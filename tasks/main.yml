@@ -1,0 +1,29 @@
+---
+- name: Set the permissions for each Drupal root directory.
+  file:
+    group: www-data
+    state: directory
+    path: "{{ item.root }}"
+    owner: "{{ drupal_permissions.user }}"
+    recurse: true
+    mode: ug=rX,o=
+  with_items: "{{ drupal_permissions.sites }}"
+
+- name: Set permissions for the defined settings files.
+  file:
+    state: file
+    path: "{{ item.0.root }}/{{ item.1 }}"
+    mode: a-X
+  with_subelements:
+    - "{{ drupal_permissions.sites }}"
+    - settings_files
+
+- name: Set permissions for the defined files directories.
+  file:
+    state: directory
+    path: "{{ item.0.root }}/{{ item.1 }}"
+    mode: ug=rwX,o=
+    recurse: true
+  with_subelements:
+    - "{{ drupal_permissions.sites }}"
+    - files_directories
